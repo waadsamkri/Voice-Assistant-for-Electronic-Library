@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>مساعد مكتبة إلكترونية</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
+
+    body {
+      font-family: 'Cairo', sans-serif;
+      margin: 0;
+      padding: 50px 20px;
+      min-height: 100vh;
+      display: flex;
+      background: linear-gradient(270deg, #84fab0, #8fd3f4, #84fab0);
+      background-size: 600% 600%;
+      animation: gradientBG 20s ease infinite;
+      box-sizing: border-box;
+      color: #333;
+      direction: rtl;
+    }
+
+    @keyframes gradientBG {
+      0%{background-position:0% 50%;}
+      50%{background-position:100% 50%;}
+      100%{background-position:0% 50%;}
+    }
+
+    .main-container {
+      display: flex;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      gap: 40px;
+    }
+
+    #questionsList {
+      background: rgba(255, 255, 255, 0.85);
+      width: 280px;
+      border-radius: 15px;
+      padding: 20px 25px;
+      box-shadow: 0 6px 20px rgba(41, 128, 185, 0.1);
+      color: #2c3e50;
+      font-size: 1.1rem;
+      user-select: text;
+      text-align: right;
+      line-height: 1.5;
+      max-height: 80vh;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+
+    #questionsList h2 {
+      margin-top: 0;
+      font-weight: 700;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #2980b9;
+      padding-bottom: 7px;
+    }
+
+    #questionsList ul {
+      padding-left: 15px;
+      margin: 0;
+    }
+
+    #questionsList li {
+      margin-bottom: 12px;
+      cursor: default;
+    }
+
+    .content-container {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      font-weight: 900;
+      font-size: 3rem;
+      margin-bottom: 15px;
+      color: #2c3e50;
+      text-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+      user-select: none;
+    }
+
+    button {
+      background: #2980b9;
+      color: white;
+      border: none;
+      border-radius: 60px;
+      padding: 18px 50px;
+      font-size: 1.4rem;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(41, 128, 185, 0.5);
+      transition: all 0.3s ease;
+      user-select: none;
+      margin-top: 25px;
+      min-width: 250px;
+    }
+
+    button:hover {
+      background: #1c5980;
+      box-shadow: 0 12px 30px rgba(28, 89, 128, 0.7);
+      transform: scale(1.05);
+    }
+
+    .container {
+      background: white;
+      width: 100%;
+      max-width: 700px;
+      border-radius: 25px;
+      padding: 25px 30px;
+      margin-top: 25px;
+      box-shadow: 0 10px 30px rgba(41, 128, 185, 0.15);
+      color: #2c3e50;
+      font-size: 1.3rem;
+      font-weight: 600;
+      user-select: none;
+      min-height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: box-shadow 0.3s ease;
+      text-align: center;
+    }
+
+    .container:hover {
+      box-shadow: 0 15px 40px rgba(41, 128, 185, 0.3);
+    }
+
+    #timeTaken {
+      margin-top: 20px;
+      font-size: 1.3rem;
+      color: #2980b9;
+      font-weight: 700;
+      min-height: 30px;
+      user-select: none;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <div class="content-container">
+      <h1>مساعد مكتبة إلكترونية</h1>
+
+      <button id="startBtn">ابدأ التحدث</button>
+
+      <div class="container" id="userQuestion">---</div>
+      <div class="container" id="assistantReply">---</div>
+      <div id="timeTaken">وقت الرد: -- ثواني</div>
+    </div>
+
+    <div id="questionsList">
+      <h2>أسئلة شائعة يمكنك طرحها:</h2>
+      <ul>
+        <li>ما هي خدمات المكتبة؟</li>
+        <li>كم سعر الاشتراك الشهري؟</li>
+        <li>هل يمكنني استعارة الكتب الورقية؟</li>
+        <li>ما هي أوقات العمل؟</li>
+        <li>هل توجد خدمة التوصيل؟</li>
+        <li>كيف أسجل في المكتبة؟</li>
+        <li>هل توجد كتب للطلبة الجامعيين؟</li>
+        <li>ما هي طرق الدفع المتاحة؟</li>
+        <li>هل توجد فعاليات في المكتبة؟</li>
+        <li>كيف أتواصل مع خدمة العملاء؟</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    const startBtn = document.getElementById("startBtn");
+    const userQuestion = document.getElementById("userQuestion");
+    const assistantReply = document.getElementById("assistantReply");
+    const timeTakenDisplay = document.getElementById("timeTaken");
+
+    let countdownInterval;
+    let loadingInterval;
+
+    const localAnswers = {
+      "ما هي خدمات المكتبة": "نوفر استعارة الكتب، خدمات القراءة الرقمية، وإمكانية حجز القاعات للفعاليات.",
+      "كم سعر الاشتراك الشهري": "سعر الاشتراك الشهري هو 50 ريال سعودي ويوفر لك وصولًا غير محدود إلى الكتب الرقمية.",
+      "هل يمكنني استعارة الكتب الورقية": "نعم، يمكنك استعارة الكتب الورقية لمدة تصل إلى 14 يومًا مع إمكانية التجديد.",
+      "ما هي أوقات العمل": "المكتبة تعمل من الأحد إلى الخميس من 9 صباحًا حتى 9 مساءً، والجمعة والسبت مغلقة.",
+      "هل توجد خدمة التوصيل": "نعم، نقدم خدمة توصيل الكتب الرقمية فور الاشتراك وخدمة توصيل الكتب الورقية داخل المدينة بتكلفة إضافية.",
+      "كيف أسجل في المكتبة": "يمكنك التسجيل عبر موقعنا الإلكتروني أو من خلال زيارة المكتبة شخصيًا.",
+      "هل توجد كتب للطلبة الجامعيين": "نعم، لدينا مجموعة كبيرة من الكتب الأكاديمية والمراجع للطلاب.",
+      "ما هي طرق الدفع المتاحة": "نقبل الدفع الإلكتروني عن طريق بطاقات الائتمان، مدى، والمحافظ الرقمية.",
+      "هل توجد فعاليات في المكتبة": "نظمنا ورش عمل، لقاءات مع مؤلفين، وبرامج قرائية بشكل دوري.",
+      "كيف أتواصل مع خدمة العملاء": "يمكنك التواصل معنا عبر البريد الإلكتروني support@library.com أو الاتصال على 123456789."
+    };
+
+    function speak(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ar-SA';
+      utterance.rate = 1.05;
+      speechSynthesis.speak(utterance);
+    }
+
+    function startCountdown(duration) {
+      let timeLeft = duration;
+      timeTakenDisplay.textContent = `وقت الرد: ${timeLeft} ثواني`;
+      countdownInterval = setInterval(() => {
+        timeLeft--;
+        if (timeLeft <= 0) {
+          clearInterval(countdownInterval);
+          timeTakenDisplay.textContent = `تم الرد!`;
+        } else {
+          timeTakenDisplay.textContent = `وقت الرد: ${timeLeft} ثواني`;
+        }
+      }, 1000);
+    }
+
+    function startLoadingAnimation() {
+      let dots = 0;
+      assistantReply.textContent = "المساعد يفكر";
+      loadingInterval = setInterval(() => {
+        dots = (dots + 1) % 4;
+        assistantReply.textContent = "المساعد يفكر" + ".".repeat(dots);
+      }, 500);
+    }
+
+    function stopLoadingAnimation() {
+      clearInterval(loadingInterval);
+    }
+
+    async function getAIResponse(question) {
+      startCountdown(6);
+      startLoadingAnimation();
+
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          stopLoadingAnimation();
+          clearInterval(countdownInterval);
+          timeTakenDisplay.textContent = `تم الرد!`;
+
+          const cleaned = question.trim().replace(/[؟?]/g, "").toLowerCase();
+          const questionWords = cleaned.split(" ").filter(w => w.length > 2);
+
+          let matchedKey = null;
+          for (const key of Object.keys(localAnswers)) {
+            const keyWords = key.toLowerCase().split(" ").filter(w => w.length > 2);
+            let matchCount = 0;
+            for (const kw of keyWords) {
+              if (questionWords.includes(kw)) {
+                matchCount++;
+              }
+            }
+            if (matchCount >= 2) {  // هنا نحدد الحد الأدنى لعدد الكلمات المتطابقة
+              matchedKey = key;
+              break;
+            }
+          }
+
+          if (matchedKey) {
+            resolve(localAnswers[matchedKey]);
+          } else {
+            const fallback = [
+              "عذرًا، لم أفهم سؤالك بشكل جيد. حاول إعادة صياغته.",
+              "هل يمكنك سؤال شيء آخر يتعلق بالمكتبة؟",
+              "أنا هنا لمساعدتك في خدمات وأسعار المكتبة."
+            ];
+            resolve(fallback[Math.floor(Math.random() * fallback.length)]);
+          }
+        }, 3000);
+      });
+    }
+
+    function startRecognition() {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'ar-SA';
+
+      recognition.start();
+
+      recognition.onstart = () => {
+        userQuestion.textContent = "جاري الاستماع...";
+        assistantReply.textContent = "---";
+        timeTakenDisplay.textContent = "وقت الرد: -- ثواني";
+      };
+
+      recognition.onresult = async (event) => {
+        const transcript = event.results[0][0].transcript;
+        userQuestion.textContent = transcript;
+
+        assistantReply.textContent = "المساعد يفكر...";
+        timeTakenDisplay.textContent = "وقت الرد: 6 ثواني";
+
+        const reply = await getAIResponse(transcript);
+        if(reply) {
+          assistantReply.textContent = reply;
+          speak(reply);
+        }
+      };
+
+      recognition.onerror = (event) => {
+        userQuestion.textContent = "حدث خطأ: " + event.error;
+        assistantReply.textContent = "---";
+        timeTakenDisplay.textContent = "وقت الرد: -- ثواني";
+      };
+    }
+
+    startBtn.addEventListener("click", startRecognition);
+  </script>
+</body>
+</html>
